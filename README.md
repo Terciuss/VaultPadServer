@@ -146,9 +146,9 @@ server/
 | Column | Type | Description |
 |---|---|---|
 | `id` | BIGINT PK | Auto-increment ID |
-| `user_id` | BIGINT FK | Owner |
-| `encrypted_name` | BLOB | Encrypted file name |
+| `name` | TEXT | File name (plaintext) |
 | `encrypted_content` | MEDIUMBLOB | Encrypted file content |
+| `key_check` | BLOB | Encrypted marker for key type detection |
 | `sort_order` | INT | Display order |
 | `created_at` | TIMESTAMP | Creation date |
 | `updated_at` | TIMESTAMP | Last update |

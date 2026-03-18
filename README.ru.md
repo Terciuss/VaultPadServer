@@ -146,9 +146,9 @@ server/
 | Колонка | Тип | Описание |
 |---|---|---|
 | `id` | BIGINT PK | Автоинкрементный ID |
-| `user_id` | BIGINT FK | Владелец |
-| `encrypted_name` | BLOB | Зашифрованное имя файла |
+| `name` | TEXT | Имя файла (открытый текст) |
 | `encrypted_content` | MEDIUMBLOB | Зашифрованный контент файла |
+| `key_check` | BLOB | Зашифрованный маркер типа ключа |
 | `sort_order` | INT | Порядок отображения |
 | `created_at` | TIMESTAMP | Дата создания |
 | `updated_at` | TIMESTAMP | Дата последнего обновления |
