@@ -29,75 +29,25 @@ func (s *ProjectService) List(userID int64) ([]model.Project, error) {
 	if s.isAdmin(userID) {
 		return s.projects.ListAll()
 	}
-
-	own, err := s.projects.ListByUser(userID)
-	if err != nil {
-		return nil, err
-	}
-	shared, err := s.shares.ListSharedProjects(userID)
-	if err != nil {
-		return nil, err
-	}
-
-	seen := make(map[int64]bool)
-	var result []model.Project
-	for _, p := range own {
-		seen[p.ID] = true
-		result = append(result, p)
-	}
-	for _, p := range shared {
-		if !seen[p.ID] {
-			result = append(result, p)
-		}
-	}
-	return result, nil
+	return s.shares.ListSharedProjects(userID)
 }
 
 func (s *ProjectService) ListMeta(userID int64) ([]model.ProjectMeta, error) {
 	if s.isAdmin(userID) {
 		return s.projects.ListAllMeta()
 	}
-
-	own, err := s.projects.ListMetaByUser(userID)
-	if err != nil {
-		return nil, err
-	}
-	shared, err := s.shares.ListSharedProjectsMeta(userID)
-	if err != nil {
-		return nil, err
-	}
-
-	seen := make(map[int64]bool)
-	var result []model.ProjectMeta
-	for _, m := range own {
-		seen[m.ID] = true
-		result = append(result, m)
-	}
-	for _, m := range shared {
-		if !seen[m.ID] {
-			result = append(result, m)
-		}
-	}
-	return result, nil
+	return s.shares.ListSharedProjectsMeta(userID)
 }
 
 func (s *ProjectService) Get(id, userID int64) (*model.Project, error) {
 	if s.isAdmin(userID) {
-		p, err := s.projects.GetByIDRaw(id)
+		p, err := s.projects.GetByID(id)
 		if err != nil {
 			return nil, err
 		}
 		if p == nil {
 			return nil, fmt.Errorf("project not found")
 		}
-		return p, nil
-	}
-
-	p, err := s.projects.GetByID(id, userID)
-	if err != nil {
-		return nil, err
-	}
-	if p != nil {
 		return p, nil
 	}
 
@@ -109,7 +59,7 @@ func (s *ProjectService) Get(id, userID int64) (*model.Project, error) {
 		return nil, fmt.Errorf("project not found")
 	}
 
-	p, err = s.projects.GetByIDRaw(id)
+	p, err := s.projects.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -121,34 +71,31 @@ func (s *ProjectService) Get(id, userID int64) (*model.Project, error) {
 
 func (s *ProjectService) Create(userID int64, req model.CreateProjectRequest) (*model.Project, error) {
 	p := &model.Project{
-		UserID:           userID,
 		EncryptedName:    req.EncryptedName,
 		EncryptedContent: req.EncryptedContent,
 		SortOrder:        req.SortOrder,
 	}
-	return s.projects.Create(p)
+	created, err := s.projects.Create(p)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.shares.Share(created.ID, userID, userID); err != nil {
+		return nil, fmt.Errorf("auto-share for creator: %w", err)
+	}
+
+	return created, nil
 }
 
 func (s *ProjectService) Update(id, userID int64, req model.UpdateProjectRequest) error {
 	if s.isAdmin(userID) {
-		existing, err := s.projects.GetByIDRaw(id)
+		existing, err := s.projects.GetByID(id)
 		if err != nil {
 			return err
 		}
 		if existing == nil {
 			return fmt.Errorf("project not found")
 		}
-		existing.EncryptedName = req.EncryptedName
-		existing.EncryptedContent = req.EncryptedContent
-		existing.SortOrder = req.SortOrder
-		return s.projects.UpdateRaw(existing)
-	}
-
-	existing, err := s.projects.GetByID(id, userID)
-	if err != nil {
-		return err
-	}
-	if existing != nil {
 		existing.EncryptedName = req.EncryptedName
 		existing.EncryptedContent = req.EncryptedContent
 		existing.SortOrder = req.SortOrder
@@ -163,7 +110,7 @@ func (s *ProjectService) Update(id, userID int64, req model.UpdateProjectRequest
 		return fmt.Errorf("project not found")
 	}
 
-	existing, err = s.projects.GetByIDRaw(id)
+	existing, err := s.projects.GetByID(id)
 	if err != nil {
 		return err
 	}
@@ -173,12 +120,12 @@ func (s *ProjectService) Update(id, userID int64, req model.UpdateProjectRequest
 	existing.EncryptedName = req.EncryptedName
 	existing.EncryptedContent = req.EncryptedContent
 	existing.SortOrder = req.SortOrder
-	return s.projects.UpdateRaw(existing)
+	return s.projects.Update(existing)
 }
 
 func (s *ProjectService) Delete(id, userID int64) error {
-	if s.isAdmin(userID) {
-		return s.projects.DeleteRaw(id)
+	if !s.isAdmin(userID) {
+		return fmt.Errorf("forbidden: only admins can delete projects")
 	}
-	return s.projects.Delete(id, userID)
+	return s.projects.Delete(id)
 }

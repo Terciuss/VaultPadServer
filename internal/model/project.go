@@ -4,7 +4,6 @@ import "time"
 
 type Project struct {
 	ID               int64     `json:"id"`
-	UserID           int64     `json:"user_id"`
 	EncryptedName    []byte    `json:"encrypted_name"`
 	EncryptedContent []byte    `json:"encrypted_content"`
 	SortOrder        int       `json:"sort_order"`
