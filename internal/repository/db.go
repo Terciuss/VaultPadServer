@@ -59,7 +59,7 @@ func Migrate(db *sql.DB) error {
 	alterQueries := []string{
 		"ALTER TABLE users ADD COLUMN is_admin BOOLEAN DEFAULT FALSE",
 		"ALTER TABLE projects DROP COLUMN has_custom_password",
-		"ALTER TABLE projects ADD COLUMN name TEXT NOT NULL DEFAULT ''",
+		"ALTER TABLE projects ADD COLUMN name TEXT NOT NULL",
 		"ALTER TABLE projects ADD COLUMN key_check BLOB",
 		"ALTER TABLE projects DROP COLUMN encrypted_name",
 	}
