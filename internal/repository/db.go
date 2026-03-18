@@ -32,8 +32,9 @@ func Migrate(db *sql.DB) error {
 		)`,
 		`CREATE TABLE IF NOT EXISTS projects (
 			id BIGINT PRIMARY KEY AUTO_INCREMENT,
-			encrypted_name BLOB NOT NULL,
+			name TEXT NOT NULL,
 			encrypted_content MEDIUMBLOB NOT NULL,
+			key_check BLOB,
 			sort_order INT DEFAULT 0,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -58,6 +59,9 @@ func Migrate(db *sql.DB) error {
 	alterQueries := []string{
 		"ALTER TABLE users ADD COLUMN is_admin BOOLEAN DEFAULT FALSE",
 		"ALTER TABLE projects DROP COLUMN has_custom_password",
+		"ALTER TABLE projects ADD COLUMN name TEXT NOT NULL DEFAULT ''",
+		"ALTER TABLE projects ADD COLUMN key_check BLOB",
+		"ALTER TABLE projects DROP COLUMN encrypted_name",
 	}
 	for _, q := range alterQueries {
 		db.Exec(q)

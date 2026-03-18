@@ -71,8 +71,9 @@ func (s *ProjectService) Get(id, userID int64) (*model.Project, error) {
 
 func (s *ProjectService) Create(userID int64, req model.CreateProjectRequest) (*model.Project, error) {
 	p := &model.Project{
-		EncryptedName:    req.EncryptedName,
+		Name:             req.Name,
 		EncryptedContent: req.EncryptedContent,
+		KeyCheck:         req.KeyCheck,
 		SortOrder:        req.SortOrder,
 	}
 	created, err := s.projects.Create(p)
@@ -96,8 +97,9 @@ func (s *ProjectService) Update(id, userID int64, req model.UpdateProjectRequest
 		if existing == nil {
 			return fmt.Errorf("project not found")
 		}
-		existing.EncryptedName = req.EncryptedName
+		existing.Name = req.Name
 		existing.EncryptedContent = req.EncryptedContent
+		existing.KeyCheck = req.KeyCheck
 		existing.SortOrder = req.SortOrder
 		return s.projects.Update(existing)
 	}
@@ -117,8 +119,9 @@ func (s *ProjectService) Update(id, userID int64, req model.UpdateProjectRequest
 	if existing == nil {
 		return fmt.Errorf("project not found")
 	}
-	existing.EncryptedName = req.EncryptedName
+	existing.Name = req.Name
 	existing.EncryptedContent = req.EncryptedContent
+	existing.KeyCheck = req.KeyCheck
 	existing.SortOrder = req.SortOrder
 	return s.projects.Update(existing)
 }

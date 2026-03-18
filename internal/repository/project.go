@@ -18,12 +18,12 @@ func NewProjectRepository(db *sql.DB) *ProjectRepository {
 func (r *ProjectRepository) GetByID(id int64) (*model.Project, error) {
 	var p model.Project
 	err := r.db.QueryRow(
-		`SELECT id, encrypted_name, encrypted_content,
+		`SELECT id, name, encrypted_content, key_check,
 		        sort_order, created_at, updated_at
 		 FROM projects WHERE id = ?`,
 		id,
 	).Scan(
-		&p.ID, &p.EncryptedName, &p.EncryptedContent,
+		&p.ID, &p.Name, &p.EncryptedContent, &p.KeyCheck,
 		&p.SortOrder, &p.CreatedAt, &p.UpdatedAt,
 	)
 	if err == sql.ErrNoRows {
@@ -37,9 +37,9 @@ func (r *ProjectRepository) GetByID(id int64) (*model.Project, error) {
 
 func (r *ProjectRepository) Create(p *model.Project) (*model.Project, error) {
 	result, err := r.db.Exec(
-		`INSERT INTO projects (encrypted_name, encrypted_content, sort_order)
-		 VALUES (?, ?, ?)`,
-		p.EncryptedName, p.EncryptedContent, p.SortOrder,
+		`INSERT INTO projects (name, encrypted_content, key_check, sort_order)
+		 VALUES (?, ?, ?, ?)`,
+		p.Name, p.EncryptedContent, p.KeyCheck, p.SortOrder,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("create project: %w", err)
@@ -50,11 +50,11 @@ func (r *ProjectRepository) Create(p *model.Project) (*model.Project, error) {
 
 func (r *ProjectRepository) Update(p *model.Project) error {
 	_, err := r.db.Exec(
-		`UPDATE projects SET encrypted_name = ?, encrypted_content = ?,
-		        sort_order = ?
+		`UPDATE projects SET name = ?, encrypted_content = ?,
+		        key_check = ?, sort_order = ?
 		 WHERE id = ?`,
-		p.EncryptedName, p.EncryptedContent,
-		p.SortOrder, p.ID,
+		p.Name, p.EncryptedContent,
+		p.KeyCheck, p.SortOrder, p.ID,
 	)
 	if err != nil {
 		return fmt.Errorf("update project: %w", err)
@@ -76,7 +76,7 @@ func (r *ProjectRepository) Delete(id int64) error {
 
 func (r *ProjectRepository) ListAll() ([]model.Project, error) {
 	rows, err := r.db.Query(
-		`SELECT id, encrypted_name, encrypted_content,
+		`SELECT id, name, encrypted_content, key_check,
 		        sort_order, created_at, updated_at
 		 FROM projects ORDER BY sort_order ASC, created_at ASC`,
 	)
@@ -89,7 +89,7 @@ func (r *ProjectRepository) ListAll() ([]model.Project, error) {
 	for rows.Next() {
 		var p model.Project
 		if err := rows.Scan(
-			&p.ID, &p.EncryptedName, &p.EncryptedContent,
+			&p.ID, &p.Name, &p.EncryptedContent, &p.KeyCheck,
 			&p.SortOrder, &p.CreatedAt, &p.UpdatedAt,
 		); err != nil {
 			return nil, fmt.Errorf("scan project: %w", err)

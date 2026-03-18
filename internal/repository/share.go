@@ -43,7 +43,7 @@ func (r *ShareRepository) Unshare(projectID, userID int64) error {
 
 func (r *ShareRepository) ListSharedProjects(userID int64) ([]model.Project, error) {
 	rows, err := r.db.Query(
-		`SELECT p.id, p.encrypted_name, p.encrypted_content,
+		`SELECT p.id, p.name, p.encrypted_content, p.key_check,
 		        p.sort_order, p.created_at, p.updated_at
 		 FROM projects p
 		 INNER JOIN project_shares ps ON ps.project_id = p.id
@@ -60,7 +60,7 @@ func (r *ShareRepository) ListSharedProjects(userID int64) ([]model.Project, err
 	for rows.Next() {
 		var p model.Project
 		if err := rows.Scan(
-			&p.ID, &p.EncryptedName, &p.EncryptedContent,
+			&p.ID, &p.Name, &p.EncryptedContent, &p.KeyCheck,
 			&p.SortOrder, &p.CreatedAt, &p.UpdatedAt,
 		); err != nil {
 			return nil, fmt.Errorf("scan shared project: %w", err)
