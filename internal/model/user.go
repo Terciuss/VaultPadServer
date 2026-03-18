@@ -32,6 +32,12 @@ type AdminUpdateUserRequest struct {
 	IsAdmin  bool   `json:"is_admin"`
 }
 
+type UpdateProfileRequest struct {
+	CurrentPassword string `json:"current_password"`
+	Email           string `json:"email"`
+	NewPassword     string `json:"new_password"`
+}
+
 type ShareProjectRequest struct {
 	UserID int64 `json:"user_id"`
 }

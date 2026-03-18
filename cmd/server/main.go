@@ -56,6 +56,7 @@ func main() {
 
 	// Auth routes
 	mux.Handle("GET /api/auth/me", authMiddleware(http.HandlerFunc(authHandler.Me)))
+	mux.Handle("PUT /api/users/me", authMiddleware(http.HandlerFunc(authHandler.UpdateProfile)))
 
 	// Protected routes
 	mux.Handle("GET /api/projects/meta", authMiddleware(http.HandlerFunc(projectHandler.ListMeta)))
