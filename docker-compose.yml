@@ -21,10 +21,10 @@ services:
       # DSN always uses "db" host inside Docker network; .env's DATABASE_DSN (127.0.0.1) is ignored
       DATABASE_DSN: root:${MYSQL_ROOT_PASSWORD:-root}@tcp(db:3306)/${MYSQL_DATABASE:-vault_pad}?parseTime=true
       JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
-      LISTEN_ADDR: ${LISTEN_ADDR:-:8080}
+      LISTEN_ADDR: ":${PORT:-8080}"
       SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@local.local}
     ports:
-      - "8080:8080"
+      - "127.0.0.1:${PORT:-8080}:${PORT:-8080}"
 
 volumes:
   mysql_data:
